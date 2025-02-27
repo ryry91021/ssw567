@@ -24,15 +24,14 @@ def main(user):
         data={}
         #Fetch names
         for project in account:
-            print(project['name'])
-
+            
             #Get commit counts
             commitUrl=f"https://api.github.com/repos/{project['full_name']}/commits"
-            print(commitUrl)
+            #print(commitUrl)
 
-            print()
+            #print()
             commitResponse=requests.get(commitUrl, headers=HEADERS)
-            print()
+            #print()
             if commitResponse.status_code!=200:
                 print("Project may not exist")
                 raise Exception(f"Failed to retreive {project['name']} and its commits on status code: {commitResponse.status_code}")
@@ -48,6 +47,8 @@ def main(user):
     for repository, commits in data.items():
         print(f"Repo: {repository}. Number of commits: {commits}")
 
+    return data
+
 
 
 
@@ -58,8 +59,10 @@ def main(user):
 if __name__=="__main__":
     user=None
 
-    if user==None:
-        user=input("Enter a GitHub username to view their repositories. Leave blank to default to mine.")
+
+    user=input("Enter a GitHub username to view their repositories. Leave blank to default to mine: ")
+    if not user:
         user='ryry91021'
     
     main(user)
+    
