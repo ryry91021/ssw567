@@ -28,10 +28,10 @@ def main(user):
             #Get commit counts
             commitUrl=f"https://api.github.com/repos/{project['full_name']}/commits"
             #print(commitUrl)
-
             #print()
+            
+            #fetch commit api info
             commitResponse=requests.get(commitUrl, headers=HEADERS)
-            #print()
             if commitResponse.status_code!=200:
                 print("Project may not exist")
                 raise Exception(f"Failed to retreive {project['name']} and its commits on status code: {commitResponse.status_code}")
