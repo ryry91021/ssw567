@@ -1,10 +1,18 @@
 import requests, json
+import os
+from dotenv import load_dotenv
 
 def main(user):
+    load_dotenv()
+    GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+    print(f"Token Loaded: {'FOUND' if GITHUB_TOKEN else 'NOT FOUND'}")
+    HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"} if GITHUB_TOKEN else {}
+
+
     repoUrl=f"https://api.github.com/users/{user}/repos"
     
     #HTTP request for repository information (names)
-    repoResponse=requests.get(repoUrl)
+    repoResponse=requests.get(repoUrl, headers=HEADERS)
     if repoResponse.status_code!=200:
         if repoResponse.status_code==403:
              raise Exception("Too many GitHub API calls. Wait a while.")
@@ -19,23 +27,27 @@ def main(user):
             print(project['name'])
 
             #Get commit counts
-            commitUrl=f"https://api.github.com/{project['full_name']}/commits"
+            commitUrl=f"https://api.github.com/repos/{project['full_name']}/commits"
             print(commitUrl)
 
             print()
-            commitResponse=requests.get(commitUrl)
+            commitResponse=requests.get(commitUrl, headers=HEADERS)
             print()
             if commitResponse.status_code!=200:
                 print("Project may not exist")
                 raise Exception(f"Failed to retreive {project['name']} and its commits on status code: {commitResponse.status_code}")
-            elif commitResponse.status_code==409:
-                        print(f"Warning: Repository {project['name']} has no commits (empty repo).")
+            if commitResponse.status_code == 409:
+                print(f"Warning: Repository {project['name']} has no commits (empty repo).")
+                data[project['name']] = 0
+
             else:
-                 data[str(project)]=len(commitResponse.json())
+                data[project['name']] = len(commitResponse.json())
+
 
             
-    for repository in data:
-         print(f"Repo: {data.keys(repository)}. Number of commits: {data.items(repository)}")
+    for repository, commits in data.items():
+        print(f"Repo: {repository}. Number of commits: {commits}")
+
 
 
 
