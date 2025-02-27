@@ -1,16 +1,43 @@
 import requests, json
 
 def main(user):
-    url=f"https://api.github.com/users/{user}/repos"
-
-    response=requests.get(url)
-    if response.status_code!=200:
+    repoUrl=f"https://api.github.com/users/{user}/repos"
+    
+    #HTTP request for repository information (names)
+    repoResponse=requests.get(repoUrl)
+    if repoResponse.status_code!=200:
+        if repoResponse.status_code==403:
+             raise Exception("Too many GitHub API calls. Wait a while.")
         print("User may not exist")
-        raise Exception(f"Failed to retrieve data. HTTP Status code: {response.status_code}")
+        raise Exception(f"Failed to retrieve data. HTTP Status code: {repoResponse.status_code}")
+    
     else:
-        account=response.json()
+        account=repoResponse.json()
+        data={}
+        #Fetch names
         for project in account:
             print(project['name'])
+
+            #Get commit counts
+            commitUrl=f"https://api.github.com/repos/{user}/{project}/commits"
+
+
+            print()
+            commitResponse=requests.get(commitUrl)
+            print()
+            if commitResponse.status_code!=200:
+                print("Project may not exist")
+                raise Exception(f"Failed to retreive {project['name']} and its commits on status code: {commitResponse.status_code}")
+            elif commitResponse.status_code==409:
+                        print(f"Warning: Repository {project['name']} has no commits (empty repo).")
+            else:
+                 data[str(project)]=len(commitResponse.json())
+
+            
+    for repository in data:
+         print(f"Repo: {data.keys(repository)}. Number of commits: {data.items(repository)}")
+
+
 
     
 
