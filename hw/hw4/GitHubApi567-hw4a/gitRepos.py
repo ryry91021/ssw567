@@ -19,8 +19,8 @@ def main(user):
             print(project['name'])
 
             #Get commit counts
-            commitUrl=f"https://api.github.com/repos/{user}/{project}/commits"
-
+            commitUrl=f"https://api.github.com/{project['full_name']}/commits"
+            print(commitUrl)
 
             print()
             commitResponse=requests.get(commitUrl)
