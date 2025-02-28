@@ -1,0 +1,19 @@
+version: 2.1
+
+jobs:
+  test:
+    docker:
+      - image: python:3.9  # Adjust to your Python version
+    steps:
+      - checkout  # Pull the latest code from GitHub
+      - run:
+          name: Run Python Tests
+          working_directory: hw/hw4/GitHubApi567-hw4a  # Set correct working directory
+          command: python -m unittest discover -s .  # Run unittests
+
+workflows:
+  version: 2
+  test_and_build:
+    jobs:
+      - test
+
