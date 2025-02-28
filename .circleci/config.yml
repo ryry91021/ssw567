@@ -3,15 +3,15 @@ version: 2.1
 jobs:
   test:
     docker:
-      - image: python:3.13.2  # Use the Python version you need
+      - image: python:3.13.2
     steps:
-      - checkout  # Pull latest code from GitHub
+      - checkout
       - run:
-          name: Install requests
-          command: python -m pip install --upgrade pip requests
+          name: Install Dependencies
+          command: python -m pip install --upgrade pip requests python-dotenv
       - run:
           name: Run Python Tests
-          working_directory: hw/hw4/GitHubApi567-hw4a  # Set the correct working directory
+          working_directory: hw/hw4/GitHubApi567-hw4a
           command: python -m unittest discover -s .
 
 workflows:
