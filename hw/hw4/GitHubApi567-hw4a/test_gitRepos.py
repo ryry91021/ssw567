@@ -25,7 +25,6 @@ class TestGitHubAPI(unittest.TestCase):
         with self.assertRaises(Exception) as context:
             gitRepos.main("thisuserdoesnotexist123456")
 
-        # Check for the exact message from your code
         self.assertIn("Failed to retrieve repositories", str(context.exception))
 
  
