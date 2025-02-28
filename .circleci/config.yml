@@ -3,17 +3,19 @@ version: 2.1
 jobs:
   test:
     docker:
-      - image: python:3.9  # Adjust to your Python version
+      - image: python:3.13.2  # Use the Python version you need
     steps:
-      - checkout  # Pull the latest code from GitHub
+      - checkout  # Pull latest code from GitHub
+      - run:
+          name: Install requests
+          command: python -m pip install --upgrade pip requests
       - run:
           name: Run Python Tests
-          working_directory: hw/hw4/GitHubApi567-hw4a  # Set correct working directory
-          command: python -m unittest discover -s .  # Run unittests
+          working_directory: hw/hw4/GitHubApi567-hw4a  # Set the correct working directory
+          command: python -m unittest discover -s .
 
 workflows:
   version: 2
   test_and_build:
     jobs:
       - test
-
