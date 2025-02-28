@@ -1,68 +1,59 @@
-import requests, json
 import os
+import requests
 from dotenv import load_dotenv
 
-def main(user):
+def get_github_token():
+    """Loads GitHub token from .env or environment variables."""
     load_dotenv()
-    GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-    print(f"Token Loaded: {'FOUND' if GITHUB_TOKEN else 'NOT FOUND'}")
+    return os.getenv("GITHUB_TOKEN")
+
+def get_repositories(user, headers):
+    """Fetches repositories for a given GitHub user."""
+    url = f"https://api.github.com/users/{user}/repos"
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 403:
+        raise Exception("Too many GitHub API calls. Wait a while.")
+    elif response.status_code != 200:
+        raise Exception(f"Failed to retrieve repositories. HTTP Status code: {response.status_code}")
+
+    return response.json()
+
+def get_commitCount(repo_full_name, headers):
+    """Fetches commit count for a given repository."""
+    url = f"https://api.github.com/repos/{repo_full_name}/commits"
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 409:
+        return 0  # Empty repo
+    elif response.status_code != 200:
+        raise Exception(f"Failed to retrieve commits for {repo_full_name}. Status code: {response.status_code}")
+
+    return len(response.json())
+
+def main(user):
+    """Main function to fetch repositories and commit counts."""
+    #check for token
+    GITHUB_TOKEN = get_github_token()
     HEADERS = {"Authorization": f"token {GITHUB_TOKEN}"} if GITHUB_TOKEN else {}
 
-
-    repoUrl=f"https://api.github.com/users/{user}/repos"
+    repositories = get_repositories(user, HEADERS)
     
-    #HTTP request for repository information (names)
-    repoResponse=requests.get(repoUrl, headers=HEADERS)
-    if repoResponse.status_code!=200:
-        if repoResponse.status_code==403:
-             raise Exception("Too many GitHub API calls. Wait a while.")
-        print("User may not exist")
-        raise Exception(f"Failed to retrieve data. HTTP Status code: {repoResponse.status_code}")
-    
-    else:
-        account=repoResponse.json()
-        data={}
-        #Fetch names
-        for project in account:
-            
-            #Get commit counts
-            commitUrl=f"https://api.github.com/repos/{project['full_name']}/commits"
-            #print(commitUrl)
-            #print()
-            
-            #fetch commit api info
-            commitResponse=requests.get(commitUrl, headers=HEADERS)
-            if commitResponse.status_code!=200:
-                print("Project may not exist")
-                raise Exception(f"Failed to retreive {project['name']} and its commits on status code: {commitResponse.status_code}")
-            if commitResponse.status_code == 409:
-                print(f"Warning: Repository {project['name']} has no commits (empty repo).")
-                data[project['name']] = 0
+    repo_data = {}
+    for repo in repositories:
+        repo_name = repo['name']
+        repo_full_name = repo['full_name']
+        
+        commit_count = get_commitCount(repo_full_name, HEADERS)
+        repo_data[repo_name] = commit_count
 
-            else:
-                data[project['name']] = len(commitResponse.json())
+    return repo_data
 
-
-            
-    for repository, commits in data.items():
-        print(f"Repo: {repository}. Number of commits: {commits}")
-
-    return data
-
-
-
-
-    
-
-
-
-if __name__=="__main__":
-    user=None
-
-
-    user=input("Enter a GitHub username to view their repositories. Leave blank to default to mine: ")
+if __name__ == "__main__":
+    user = input("Enter a GitHub username (leave blank for 'ryry91021'): ").strip()
     if not user:
-        user='ryry91021'
+        user = 'ryry91021'
     
-    main(user)
-    
+    results = main(user)
+    for repo, commits in results.items():
+        print(f"Repo: {repo}, Number of commits: {commits}")
