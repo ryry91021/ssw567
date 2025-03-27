@@ -1,3 +1,6 @@
 [submodule "hw/hw-06b"]
 	path = hw/hw-06b
 	url = https://github.com/ryry91021/hw-06b
+[submodule "SSW567-Final"]
+	path = SSW567-Final
+	url = https://github.com/JKDX4567/SSW567-Final
